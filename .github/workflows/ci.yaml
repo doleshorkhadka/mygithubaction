@@ -1,36 +1,36 @@
-name: CI Workflow
+name: CI Workflows
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run ESLint
-      run: npm run lint
+      - name: Run ESLint
+        run: npm run lint
 
-    - name: Run Jest tests
-      run: npm test -- --coverage --coverageReporters=cobertura
-
-    - name: Prepare SonarQube properties
-      run: |
-        echo "sonar.projectKey=$SONAR_PROJECT_KEY" > sonar-project.properties
-        echo "sonar.organization=$SONAR_ORGANIZATION" >> sonar-project.properties
-        echo "sonar.host.url=https://sonarcloud.io" >> sonar-project.properties
-        echo "sonar.login=$SONAR_TOKEN" >> sonar-project.properties
-        echo "sonar.javascript.lcov.reportPaths=coverage/lcov.info" >> sonar-project.properties
+      - name: Run Jest
+        run: npm test
 
     # - name: Run SonarCloud Scan
     #   uses: sonarsource/sonarcloud-github-action@master
